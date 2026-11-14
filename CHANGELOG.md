@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.9.10] — 2026-11-14
+
 ### Changed
 
 - **Breaking:** renamed the repository and Cargo package from

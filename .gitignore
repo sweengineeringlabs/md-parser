@@ -1,3 +1,4 @@
 target/
 scm/target/
+scm/examples/basic-output.txt
 **/docs/7-operations/compliance/

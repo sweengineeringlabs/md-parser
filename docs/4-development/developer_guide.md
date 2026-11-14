@@ -22,7 +22,7 @@ Update consuming applications' `Cargo.toml` entries:
 
 ```toml
 [dependencies]
-md-parser = { git = "https://github.com/sweengineeringlabs/md-parser" }
+md-parser = { git = "https://github.com/sweengineeringlabs/md-parser", tag = "v1.9.10" }
 ```
 
 Replace `use pdf_engine_presentation::...` with `use md_parser::...` and
@@ -31,8 +31,9 @@ unchanged. An existing local directory does not need to be renamed.
 
 The rename is implemented in commit `a3ed7d7`. Existing tags retain their
 original commits: `v1.9.9` predates the rename and still uses the former
-package/import names. Use the current `main`/`dev` branch or pin the rename
-commit (or a later commit) when installing the renamed package from Git.
+package/import names. `v1.9.10` is the first tag using `md-parser` / `md_parser`.
+Pin that tag as shown above, or use the current `main`/`dev` branch when
+installing the renamed package from Git.
 No crates.io publication was performed as part of the rename.
 
 ## Setup
