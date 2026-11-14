@@ -2,12 +2,13 @@
 
 ## [Unreleased]
 
+## [1.9.13] — 2026-11-14
+
 ### Changed
 
 - Renamed the Cargo package to `swe-md-parser` to resolve the crates.io name
   conflict while preserving the `md_parser` Rust library API.
-- Prepared release 1.9.13 for crates.io publication under the unoccupied
-  `swe-md-parser` package name.
+- Published release 1.9.13 to crates.io as `swe-md-parser`.
 
 ## [1.9.12] — 2026-11-14
 
