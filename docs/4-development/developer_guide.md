@@ -1,5 +1,40 @@
 # Developer guide
 
+Repository and Cargo package: `md-parser`. Rust library import: `md_parser`.
+
+## Rename migration
+
+The project was renamed from `pdf-engine-presentation` to `md-parser`.
+
+| Item | Previous name | Current name |
+|------|---------------|--------------|
+| GitHub repository | `sweengineeringlabs/pdf-engine-presentation` | `sweengineeringlabs/md-parser` |
+| Cargo dependency | `pdf-engine-presentation` | `md-parser` |
+| Rust import | `pdf_engine_presentation` | `md_parser` |
+
+For an existing checkout, update its remote from the repository root:
+
+```sh
+git remote set-url origin https://github.com/sweengineeringlabs/md-parser.git
+```
+
+Update consuming applications' `Cargo.toml` entries:
+
+```toml
+[dependencies]
+md-parser = { git = "https://github.com/sweengineeringlabs/md-parser" }
+```
+
+Replace `use pdf_engine_presentation::...` with `use md_parser::...` and
+update any fully qualified references. Parsing and validation behavior is
+unchanged. An existing local directory does not need to be renamed.
+
+The rename is implemented in commit `a3ed7d7`. Existing tags retain their
+original commits: `v1.9.9` predates the rename and still uses the former
+package/import names. Use the current `main`/`dev` branch or pin the rename
+commit (or a later commit) when installing the renamed package from Git.
+No crates.io publication was performed as part of the rename.
+
 ## Setup
 
 Install Rust 1.98.1 or later, including the `rustfmt` and `clippy` components.

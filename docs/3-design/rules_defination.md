@@ -1,6 +1,6 @@
 # Rules definition
 
-This document defines source conventions and validation behavior for the
+This document defines `md-parser` source conventions and validation behavior for the
 default `FactoryDeckParser` and `FactoryValidator` implementations. Markdown
 has no slide model: `---` slide separators and `:::notes` blocks are conventions
 defined by this library. This is a restricted text format, not a full

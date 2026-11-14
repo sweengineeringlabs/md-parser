@@ -9,7 +9,9 @@
   `pdf_engine_presentation` to `md_parser`. Update Git dependencies to
   `md-parser = { git = "https://github.com/sweengineeringlabs/md-parser" }`
   and replace `use pdf_engine_presentation::...` with `use md_parser::...`.
-  Parsing and validation behavior is unchanged.
+  Parsing and validation behavior is unchanged. See the
+  [rename migration guide](docs/4-development/developer_guide.md#rename-migration)
+  for dependency/import changes, checkout remotes, and existing tag behavior.
 
 ## [1.9.9] — 2026-11-14
 
