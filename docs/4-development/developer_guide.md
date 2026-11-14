@@ -1,6 +1,7 @@
 # Developer guide
 
-Repository and Cargo package: `md-parser`. Rust library import: `md_parser`.
+Repository: `md-parser`. Published Cargo package: `swe-md-parser` (typically
+aliased as `md-parser` by consumers). Rust library import: `md_parser`.
 
 ## Rename migration
 
@@ -32,9 +33,14 @@ unchanged. An existing local directory does not need to be renamed.
 The rename is implemented in commit `a3ed7d7`. Existing tags retain their
 original commits: `v1.9.9` predates the rename and still uses the former
 package/import names. `v1.9.10` is the first tag using `md-parser` / `md_parser`.
-Pin that tag as shown above, or use the current `main`/`dev` branch when
-installing the renamed package from Git.
-No crates.io publication was performed as part of the rename.
+The rename itself did not publish a crate. The package was subsequently
+published as `swe-md-parser` in v1.9.13. Current Git consumers should use the
+explicit package alias:
+
+```toml
+[dependencies]
+md-parser = { package = "swe-md-parser", git = "https://github.com/sweengineeringlabs/md-parser", tag = "v1.9.13" }
+```
 
 ## Setup
 
@@ -72,10 +78,9 @@ commands above are additional local checks.
 
 ## Publishing
 
-The Cargo package is distributed as `swe-md-parser` on crates.io to avoid the
-unrelated package already named `md-parser`. Consumers can use the local
-dependency alias `md-parser`; the Rust library remains `md_parser`.
-The package version and successful dry runs are not evidence of publication.
+The Cargo package `swe-md-parser` v1.9.13 is published on crates.io. This name
+avoids the unrelated package already named `md-parser`. Consumers can use the
+local dependency alias `md-parser`; the Rust library remains `md_parser`.
 
 ```sh
 cargo publish --dry-run   # verify packaging before every real publish
@@ -83,10 +88,10 @@ cargo publish
 ```
 
 `Cargo.toml` sets `publish = true` explicitly and declares the package
-version. For a subsequent release, bump the version and update `CHANGELOG.md`
-before publishing. Only publish after the registry-name decision and relevant
-credentials are resolved. After a successful first publication, update
-installation examples and documentation links to the actual published package.
+version. For a subsequent release, bump the version and update `CHANGELOG.md`,
+run the publish dry run, publish with the authorized registry credentials, and
+verify the new version is downloadable from crates.io. Keep installation
+examples and documentation links aligned with the released package name.
 
 ## Public API and versioning
 

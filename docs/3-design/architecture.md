@@ -5,7 +5,9 @@ slide conventions, metadata, validation limits, and error behavior. This
 document explains the module structure and design decisions that implement
 those rules.
 
-The Cargo package is `md-parser` and the Rust library import is `md_parser`.
+The repository is `md-parser`; the published Cargo package is
+`swe-md-parser`, commonly aliased as `md-parser` in consuming manifests. The
+Rust library import is `md_parser`.
 For existing consumers, see the [rename migration guide](../4-development/developer_guide.md#rename-migration).
 
 ## What

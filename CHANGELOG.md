@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Documentation
+
+- Clarified the published `swe-md-parser` package name and the `md-parser`
+  dependency alias in installation and migration guidance.
+
 ## [1.9.13] — 2026-11-14
 
 ### Changed
@@ -92,5 +97,5 @@
   `OverflowPolicy`, and `PresentationError` contracts. Zero runtime
   dependencies.
 
-This entry records the standalone source version, not a confirmed crates.io
-publication.
+The 1.9.7 source entry predates registry publication; v1.9.13 is the first
+published release under `swe-md-parser`.
