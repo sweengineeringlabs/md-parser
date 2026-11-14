@@ -48,6 +48,50 @@ fn test_all_common_heading_levels_are_preserved() {
 
 /// @covers: DeckParser
 #[test]
+fn test_mermaid_fenced_block_becomes_diagram_element() {
+    let response = FactoryDeckParser
+        .parse(ParseRequest {
+            source: "```mermaid\nflowchart TD\nA[Start] --> B{Ready?}\n```".to_string(),
+            default_aspect_ratio: AspectRatio::Widescreen16x9,
+        })
+        .unwrap_or_else(|error| panic!("Mermaid fixture failed: {error}"));
+    assert!(matches!(
+        response.deck.slides[0].elements.as_slice(),
+        [SlideElement::Diagram(source)] if source.starts_with("flowchart TD")
+    ));
+}
+
+/// @covers: DeckParser
+#[test]
+fn test_shape_directive_preserves_geometry_and_label() {
+    let response = FactoryDeckParser
+        .parse(ParseRequest {
+            source: ":::shape diamond\nDecision?\n:::".to_string(),
+            default_aspect_ratio: AspectRatio::Widescreen16x9,
+        })
+        .unwrap_or_else(|error| panic!("shape fixture failed: {error}"));
+    assert!(matches!(
+        response.deck.slides[0].elements.as_slice(),
+        [SlideElement::Shape { kind: md_parser::ShapeKind::Diamond, label }] if label == "Decision?"
+    ));
+}
+
+/// @covers: DeckParser
+#[test]
+fn test_malformed_shape_directive_is_rejected() {
+    for source in [":::shape unknown\nLabel\n:::", ":::shape circle\nLabel"] {
+        assert!(matches!(
+            FactoryDeckParser.parse(ParseRequest {
+                source: source.to_string(),
+                default_aspect_ratio: AspectRatio::Widescreen16x9,
+            }),
+            Err(PresentationError::MalformedSource(_))
+        ));
+    }
+}
+
+/// @covers: DeckParser
+#[test]
 fn test_fenced_code_preserves_blocks_and_blank_lines() {
     let cases = [
         ("```rust\nhello\n```", vec!["hello"]),

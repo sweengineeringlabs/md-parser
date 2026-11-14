@@ -10,4 +10,4 @@ pub use deck::Deck;
 pub use factory::{FactoryDeckParser, FactoryValidator};
 pub use overflow_policy::OverflowPolicy;
 pub use slide::Slide;
-pub use slide_element::SlideElement;
+pub use slide_element::{ShapeKind, SlideElement};

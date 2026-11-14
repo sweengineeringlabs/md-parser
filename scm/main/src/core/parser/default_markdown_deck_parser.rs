@@ -1,6 +1,6 @@
 use crate::api::{
     AspectRatio, Deck, DeckParser, FactoryDeckParser, OverflowPolicy, ParseRequest, ParseResponse,
-    PresentationError, Slide, SlideElement, ValidateRequest,
+    PresentationError, ShapeKind, Slide, SlideElement, ValidateRequest,
 };
 use std::sync::Arc;
 
@@ -62,11 +62,30 @@ impl DefaultMarkdownDeckParser {
         let mut current = Vec::new();
         let mut in_code = false;
         let mut code_lines = Vec::new();
+        let mut code_language = String::new();
         let mut in_notes = false;
+        let mut shape_kind = None;
+        let mut shape_lines = Vec::new();
         let mut paragraph_lines = Vec::new();
 
         for line in content.lines() {
             let trimmed = line.trim();
+            if let Some(kind) = shape_kind {
+                if trimmed == ":::" {
+                    let label = shape_lines.join("\n").trim().to_string();
+                    if label.is_empty() {
+                        return Err(PresentationError::MalformedSource(
+                            "shape blocks require a nonempty label".to_string(),
+                        ));
+                    }
+                    current.push(SlideElement::Shape { kind, label });
+                    shape_kind = None;
+                    shape_lines.clear();
+                } else {
+                    shape_lines.push(line.to_string());
+                }
+                continue;
+            }
             if slides.is_empty()
                 && current.is_empty()
                 && paragraph_lines.is_empty()
@@ -106,15 +125,29 @@ impl DefaultMarkdownDeckParser {
             }
             if trimmed.starts_with("```") {
                 Self::flush_paragraph(&mut paragraph_lines, &mut current);
-                in_code = !in_code;
-                if !in_code {
-                    current.push(SlideElement::Code(code_lines.join("\n")));
+                if in_code {
+                    in_code = false;
+                    let code = code_lines.join("\n");
+                    if code_language.eq_ignore_ascii_case("mermaid") {
+                        current.push(SlideElement::Diagram(code));
+                    } else {
+                        current.push(SlideElement::Code(code));
+                    }
                     code_lines.clear();
+                    code_language.clear();
+                } else {
+                    in_code = true;
+                    code_language = trimmed.trim_start_matches('`').trim().to_string();
                 }
                 continue;
             }
             if in_code {
                 code_lines.push(line);
+                continue;
+            }
+            if let Some(shape) = trimmed.strip_prefix(":::shape ") {
+                Self::flush_paragraph(&mut paragraph_lines, &mut current);
+                shape_kind = Some(Self::parse_shape_kind(shape)?);
                 continue;
             }
             if let Some((level, text)) = Self::heading(trimmed) {
@@ -129,9 +162,9 @@ impl DefaultMarkdownDeckParser {
                 paragraph_lines.push(line.trim_end().to_string());
             }
         }
-        if in_code || in_notes {
+        if in_code || in_notes || shape_kind.is_some() {
             return Err(PresentationError::MalformedSource(
-                "unterminated presentation block".to_string(),
+                "unterminated presentation code, notes, or shape block".to_string(),
             ));
         }
         Self::flush_paragraph(&mut paragraph_lines, &mut current);
@@ -169,6 +202,18 @@ impl DefaultMarkdownDeckParser {
         }
     }
 
+    fn parse_shape_kind(value: &str) -> Result<ShapeKind, PresentationError> {
+        match value.trim().to_ascii_lowercase().as_str() {
+            "rect" | "rectangle" => Ok(ShapeKind::Rectangle),
+            "rounded" => Ok(ShapeKind::Rounded),
+            "circle" => Ok(ShapeKind::Circle),
+            "diamond" => Ok(ShapeKind::Diamond),
+            _ => Err(PresentationError::MalformedSource(
+                "shape kind must be rectangle, rounded, circle, or diamond".to_string(),
+            )),
+        }
+    }
+
     /// Validates deterministic fixed-canvas constraints before rendering.
     fn validate_deck(deck: &Deck) -> Result<(), PresentationError> {
         if deck.slides.is_empty() {
@@ -190,6 +235,8 @@ impl DefaultMarkdownDeckParser {
                         physical_lines.max(wrapped_lines).max(1)
                     }
                     SlideElement::Code(text) => text.lines().count().max(1),
+                    SlideElement::Diagram(text) => text.lines().count().max(4),
+                    SlideElement::Shape { .. } => 4,
                     SlideElement::Notes(_) => 0,
                 })
                 .sum::<usize>();

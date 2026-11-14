@@ -10,5 +10,6 @@ pub use dto::{
 pub use error::{PresentationError, ValidationError};
 pub use traits::{DeckParser, Validator};
 pub use types::{
-    AspectRatio, Deck, FactoryDeckParser, FactoryValidator, OverflowPolicy, Slide, SlideElement,
+    AspectRatio, Deck, FactoryDeckParser, FactoryValidator, OverflowPolicy, ShapeKind, Slide,
+    SlideElement,
 };

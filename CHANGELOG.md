@@ -8,6 +8,13 @@
   conflict. Installation remains Git-based; the registry package `md-parser`
   belongs to another project, not this library.
 
+## [1.9.12] — 2026-11-14
+
+### Added
+
+- Parses labeled rectangle, rounded, circle, and diamond shape directives.
+- Preserves Mermaid fenced blocks as diagram slide elements for the renderer.
+
 ## [1.9.11] — 2026-11-14
 
 ### Changed

@@ -97,10 +97,11 @@ Outside code and notes, recognition uses trimmed lines in this order:
 1. Eligible bare metadata.
 2. A line equal to `---`: end the current slide if it has elements.
 3. A line equal to `:::notes`, case-insensitively: enter notes mode.
-4. A line starting with three backticks: enter code mode.
-5. A line starting with one to six `#` characters followed by a space: create
+4. A line starting with `:::shape `: begin a labeled shape block.
+5. A line starting with three backticks: enter code mode.
+6. A line starting with one to six `#` characters followed by a space: create
    a level 1–6 heading.
-6. Any other nonempty line: append it to the current paragraph block.
+7. Any other nonempty line: append it to the current paragraph block.
 
 Blank lines outside blocks end the current paragraph block. Adjacent nonempty
 lines are joined with LF and preserved in one `Paragraph(String)`. Heading text
@@ -120,13 +121,32 @@ renderer may interpret them.
 - A trimmed line starting with three backticks toggles code mode. Fence
   lengths and language labels are not matched or validated; tilde fences
   are not recognized.
-- Each closed block produces one `Code(String)`, including an empty block.
-  Fence lines and language labels are discarded.
+- Each closed block produces one element, including an empty block. A fenced
+  block whose opening label is `mermaid` (case-insensitive) produces
+  `Diagram(String)`; other blocks produce `Code(String)`.
+- Fence lines and non-Mermaid language labels are discarded.
 - Content lines retain whitespace and are joined with LF. Blank lines are
   retained. Separate blocks remain separate elements.
 - Slide separators, headings, metadata, and notes directives inside code are
   content. A backtick fence still closes the block.
 - End of input while in code mode returns `MalformedSource`.
+
+### Labeled shapes
+
+```text
+:::shape diamond
+Decision?
+:::
+```
+
+- The trimmed opening line must be `:::shape rectangle`, `:::shape rounded`,
+  `:::shape circle`, or `:::shape diamond` (case-insensitive). `rect` aliases
+  `rectangle`.
+- All lines up to a trimmed `:::` are joined with LF and preserved as the
+  shape's Markdown label.
+- Empty labels, unknown shape names, and unterminated blocks return
+  `MalformedSource`.
+- Shape labels participate in slide overflow validation.
 
 ### Speaker notes
 
@@ -155,6 +175,8 @@ implementations apply the same rules and leave the deck unchanged.
 | Heading | 2 |
 | Paragraph | Maximum of nonempty physical line count and Unicode scalar-value count divided by 90, rounded up; minimum 1 |
 | Code | Rust `str::lines().count()`; minimum 1 |
+| Diagram | Rust `str::lines().count()`; minimum 4 |
+| Shape | 4 |
 | Notes | 0 |
 
 At most 34 estimated lines are allowed per slide, under either aspect ratio.
