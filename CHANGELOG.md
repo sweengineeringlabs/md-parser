@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.9.9] — 2026-11-14
+
 ### Fixed
 
 - Fenced code now produces exactly one `SlideElement::Code` per block,
