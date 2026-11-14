@@ -1,6 +1,6 @@
 [package]
-name = "md-parser"
-version = "1.9.12"
+name = "swe-md-parser"
+version = "1.9.13"
 edition = "2021"
 license = "MIT"
 rust-version = "1.98.1"

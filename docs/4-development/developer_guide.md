@@ -72,12 +72,9 @@ commands above are additional local checks.
 
 ## Publishing
 
-This implementation is distributed from Git. The crates.io name `md-parser`
-is registered to a different project (`parsing-tech/md-rs`, owner `xieyuheng`);
-its existing release is not this library. Registry publication is blocked on
-resolving package naming or obtaining appropriate ownership/access, tracked in
-[pdf-engine issue #15](https://github.com/sweengineeringlabs/pdf-engine/issues/15).
-Do not substitute a registry-only dependency for the documented Git dependency.
+The Cargo package is distributed as `swe-md-parser` on crates.io to avoid the
+unrelated package already named `md-parser`. Consumers can use the local
+dependency alias `md-parser`; the Rust library remains `md_parser`.
 The package version and successful dry runs are not evidence of publication.
 
 ```sh

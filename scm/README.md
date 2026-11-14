@@ -6,12 +6,12 @@ and returns an in-memory `Deck`; it does not render or export presentations.
 
 ## Quick start
 
-Add the Git dependency to your application's `Cargo.toml`. The crates.io
-package named `md-parser` is a different project.
+Install the published crate with this package alias in your application's
+`Cargo.toml`. The Rust library name remains `md_parser`.
 
 ```toml
 [dependencies]
-md-parser = { git = "https://github.com/sweengineeringlabs/md-parser" }
+md-parser = { package = "swe-md-parser", version = "1.9.13" }
 ```
 
 For a complete parse-and-validate snippet, see the
