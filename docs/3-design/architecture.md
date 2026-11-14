@@ -7,7 +7,7 @@ those rules.
 
 ## What
 
-`pdf-engine-presentation` transforms Markdown text into a `Deck` and separately
+`md-parser` transforms Markdown text into a `Deck` and separately
 checks estimated slide content against a line budget. It is a single Rust
 library crate organized into three internal modules:
 
@@ -36,7 +36,7 @@ library crate organized into three internal modules:
   the crate root through `contract_svc.rs`'s existing `api::*` re-export.
 
 `lib.rs` re-exports every public item from `saf`, so callers only ever import
-from the crate root (`pdf_engine_presentation::{DeckParser, FactoryDeckParser,
+from the crate root (`md_parser::{DeckParser, FactoryDeckParser,
 ParseRequest, ...}`), never from `api`/`core`/`saf` directly — those module
 names are an internal organizational detail, not part of the public API.
 

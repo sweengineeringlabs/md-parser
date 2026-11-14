@@ -4,7 +4,7 @@
 //! Full behavioral coverage of the underlying type lives in
 //! `validator_int_test.rs` and `validator_factory_int_test.rs`.
 
-use pdf_engine_presentation::{
+use md_parser::{
     AspectRatio, Deck, FactoryValidator, OverflowPolicy, Slide, ValidateRequest, Validator,
 };
 use std::sync::Arc;
@@ -39,7 +39,7 @@ fn test_validator_svc_factory_import_path_empty_deck_error() {
         FactoryValidator.validate(ValidateRequest {
             deck: Arc::new(deck)
         }),
-        Err(pdf_engine_presentation::ValidationError {
+        Err(md_parser::ValidationError {
             violations: vec!["presentation deck contains no slides".to_string()]
         })
     );

@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use pdf_engine_presentation::{
+use md_parser::{
     AspectRatio, Deck, DeckParser, FactoryDeckParser, GetValidatorRequest, OverflowPolicy,
     ValidateRequest,
 };
@@ -22,7 +22,7 @@ fn test_get_validator_response_holds_usable_validator() {
         response.validator.validate(ValidateRequest {
             deck: Arc::new(deck)
         }),
-        Err(pdf_engine_presentation::ValidationError {
+        Err(md_parser::ValidationError {
             violations: vec!["presentation deck contains no slides".to_string()]
         })
     );

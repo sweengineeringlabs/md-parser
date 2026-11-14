@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use pdf_engine_presentation::OverflowPolicy;
+use md_parser::OverflowPolicy;
 
 /// @covers: OverflowPolicy
 #[test]

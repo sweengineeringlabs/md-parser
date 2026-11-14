@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use pdf_engine_presentation::PresentationError;
+use md_parser::PresentationError;
 
 /// @covers: PresentationError
 #[test]

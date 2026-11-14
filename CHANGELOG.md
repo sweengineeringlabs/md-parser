@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** renamed the repository and Cargo package from
+  `pdf-engine-presentation` to `md-parser`, and the Rust library import from
+  `pdf_engine_presentation` to `md_parser`. Update Git dependencies to
+  `md-parser = { git = "https://github.com/sweengineeringlabs/md-parser" }`
+  and replace `use pdf_engine_presentation::...` with `use md_parser::...`.
+  Parsing and validation behavior is unchanged.
+
 ## [1.9.9] — 2026-11-14
 
 ### Fixed

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# pdf-engine-presentation bootstrap — installs git hooks and fetches dependencies.
+# md-parser bootstrap — installs git hooks and fetches dependencies.
 set -euo pipefail
 
 SCM_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

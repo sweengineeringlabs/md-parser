@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use pdf_engine_presentation::{AspectRatio, DeckParser, FactoryDeckParser, ParseRequest};
+use md_parser::{AspectRatio, DeckParser, FactoryDeckParser, ParseRequest};
 
 fn main() {
     let source = "# Quarterly review\n\nRevenue increased.\n---\n## Appendix";

@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use pdf_engine_presentation::{AspectRatio, Deck, OverflowPolicy, PresentationError, Slide};
+use md_parser::{AspectRatio, Deck, OverflowPolicy, PresentationError, Slide};
 
 /// @covers: contract_svc
 #[test]

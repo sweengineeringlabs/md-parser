@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use pdf_engine_presentation::{AspectRatio, Deck, OverflowPolicy, ValidateRequest};
+use md_parser::{AspectRatio, Deck, OverflowPolicy, ValidateRequest};
 use std::sync::Arc;
 
 /// @covers: ValidateRequest

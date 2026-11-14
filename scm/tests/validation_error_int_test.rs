@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use pdf_engine_presentation::ValidationError;
+use md_parser::ValidationError;
 
 /// @covers: ValidationError
 #[test]

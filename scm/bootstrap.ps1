@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# pdf-engine-presentation bootstrap — installs git hooks and fetches dependencies.
+# md-parser bootstrap — installs git hooks and fetches dependencies.
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 

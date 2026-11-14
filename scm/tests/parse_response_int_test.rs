@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use pdf_engine_presentation::{AspectRatio, Deck, OverflowPolicy, ParseResponse};
+use md_parser::{AspectRatio, Deck, OverflowPolicy, ParseResponse};
 use std::sync::Arc;
 
 /// @covers: ParseResponse

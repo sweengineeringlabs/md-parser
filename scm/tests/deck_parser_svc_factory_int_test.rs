@@ -4,9 +4,7 @@
 //! Full behavioral coverage of the underlying type lives in
 //! `deck_parser_int_test.rs` and `deck_parser_factory_int_test.rs`.
 
-use pdf_engine_presentation::{
-    AspectRatio, DeckParser, FactoryDeckParser, ParseRequest, PresentationError,
-};
+use md_parser::{AspectRatio, DeckParser, FactoryDeckParser, ParseRequest, PresentationError};
 
 /// @covers: FactoryDeckParser
 #[test]

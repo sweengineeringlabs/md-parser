@@ -1,18 +1,18 @@
 [package]
-name = "pdf-engine-presentation"
+name = "md-parser"
 version = "1.9.9"
 edition = "2021"
 license = "MIT"
 rust-version = "1.98.1"
 authors = ["SWE Engineering Labs"]
-repository = "https://github.com/sweengineeringlabs/pdf-engine-presentation"
+repository = "https://github.com/sweengineeringlabs/md-parser"
 description = "Deterministic Markdown slide-deck parser and content-limit validator with zero external dependencies"
-keywords = ["presentation", "markdown", "slides", "pdf"]
+keywords = ["presentation", "markdown", "slides", "parsing", "validation"]
 categories = ["text-processing"]
 publish = true
 
 [lib]
-name = "pdf_engine_presentation"
+name = "md_parser"
 path = "main/src/lib.rs"
 
 [lints.rust]

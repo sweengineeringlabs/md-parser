@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use pdf_engine_presentation::{
+use md_parser::{
     AspectRatio, DeckParser, FactoryDeckParser, OverflowPolicy, ParseRequest, ValidateRequest,
 };
 use std::sync::Arc;

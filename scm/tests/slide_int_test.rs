@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use pdf_engine_presentation::{Slide, SlideElement};
+use md_parser::{Slide, SlideElement};
 
 /// @covers: Slide
 #[test]

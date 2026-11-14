@@ -1,4 +1,4 @@
-# pdf-engine-presentation
+# md-parser
 
 A Rust library that parses Markdown into slide data: deck metadata, slides,
 headings, paragraphs, code, and speaker notes. A separate validation call checks
@@ -11,11 +11,11 @@ Add the Git dependency to your application's `Cargo.toml`:
 
 ```toml
 [dependencies]
-pdf-engine-presentation = { git = "https://github.com/sweengineeringlabs/pdf-engine-presentation" }
+md-parser = { git = "https://github.com/sweengineeringlabs/md-parser" }
 ```
 
 ```rust
-use pdf_engine_presentation::{
+use md_parser::{
     AspectRatio, DeckParser, FactoryDeckParser, ParseRequest, ValidateRequest,
 };
 

@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use pdf_engine_presentation::{
+use md_parser::{
     AspectRatio, Deck, DeckParser, FactoryDeckParser, GetValidatorRequest, OverflowPolicy,
     ParseRequest, ParseResponse, PresentationError, Slide, ValidateRequest,
 };
@@ -35,7 +35,7 @@ impl DeckParser for TestDeckParser {
     fn validator(
         &self,
         _request: GetValidatorRequest,
-    ) -> Result<pdf_engine_presentation::GetValidatorResponse, PresentationError> {
+    ) -> Result<md_parser::GetValidatorResponse, PresentationError> {
         // This test double deliberately overrides the default to exercise
         // the error path: it has no validator of its own to offer.
         Err(PresentationError::MalformedSource(
@@ -239,7 +239,7 @@ fn test_validator_default_impl_detects_empty_deck_edge() {
         validator.validate(ValidateRequest {
             deck: Arc::new(deck)
         }),
-        Err(pdf_engine_presentation::ValidationError {
+        Err(md_parser::ValidationError {
             violations: vec!["presentation deck contains no slides".to_string()]
         })
     );

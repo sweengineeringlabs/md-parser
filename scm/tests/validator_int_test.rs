@@ -1,8 +1,6 @@
 #![allow(missing_docs)]
 
-use pdf_engine_presentation::{
-    AspectRatio, Deck, OverflowPolicy, Slide, ValidateRequest, Validator,
-};
+use md_parser::{AspectRatio, Deck, OverflowPolicy, Slide, ValidateRequest, Validator};
 use std::sync::Arc;
 
 /// Hand-written test double verifying the `Validator` contract itself,
@@ -10,12 +8,9 @@ use std::sync::Arc;
 struct TestValidator;
 
 impl Validator for TestValidator {
-    fn validate(
-        &self,
-        request: ValidateRequest,
-    ) -> Result<(), pdf_engine_presentation::ValidationError> {
+    fn validate(&self, request: ValidateRequest) -> Result<(), md_parser::ValidationError> {
         if request.deck.slides.is_empty() {
-            return Err(pdf_engine_presentation::ValidationError {
+            return Err(md_parser::ValidationError {
                 violations: vec!["deck has no slides".to_string()],
             });
         }
@@ -53,7 +48,7 @@ fn test_validate_empty_deck_error() {
         TestValidator.validate(ValidateRequest {
             deck: Arc::new(deck)
         }),
-        Err(pdf_engine_presentation::ValidationError {
+        Err(md_parser::ValidationError {
             violations: vec!["deck has no slides".to_string()]
         })
     );

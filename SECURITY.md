@@ -22,7 +22,7 @@ Do **not** open a public GitHub issue for security vulnerabilities.
 
 ## Threat model
 
-`pdf-engine-presentation` is a deterministic, dependency-free Markdown parser. It:
+`md-parser` is a deterministic, dependency-free Markdown parser. It:
 
 - Performs no file, network, or process I/O of its own — the parsing API takes
   an owned source `String` and transforms its text into a `Deck`.

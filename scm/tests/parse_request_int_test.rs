@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 
-use pdf_engine_presentation::{AspectRatio, ParseRequest};
+use md_parser::{AspectRatio, ParseRequest};
 
 /// @covers: ParseRequest
 #[test]
