@@ -1,30 +1,29 @@
 # pdf-engine-presentation
 
-> **TLDR:** Standalone, dependency-free, deterministic Markdown presentation-deck parser — headings, paragraphs, fenced code, speaker notes, slide breaks, TOML/YAML front matter. No runtime dependency.
+> Parses Markdown into structured slide data and validates estimated slide content limits. Rust library with zero external dependencies.
 
 ## What
 
-A Markdown-to-`Deck` parser and validator, extracted from the
-[`pdf-engine`](https://github.com/sweengineeringlabs/pdf-engine) document
-engine. The `DeckParser` trait turns a Markdown source string into a `Deck` of
+`pdf-engine-presentation` is a Rust library. The `DeckParser` trait turns a
+Markdown source string into a `Deck` of
 `Slide`s made of `SlideElement`s (headings, paragraphs, fenced code, speaker
 notes). A separate `validate()` call checks the result against a deterministic
 fixed-canvas line estimate; `FactoryDeckParser` is the default implementation.
-The crate has no external dependencies.
+The output is Rust data held in memory. The library does not create a
+presentation file, render slides, or export HTML/PDF.
 
 ## Why
 
-`pdf-engine` needed a small, deterministic Markdown subset parser for its
-presentation-deck feature and it turned out to be generally useful independent
-of that: no async runtime, no regex engine, no external crate at all — just
-line-oriented parsing over `&str`. Identical input produces an equal `Deck`,
-every time.
+Slide content has a simple structure: metadata, ordered slides, and ordered
+elements within each slide. This library makes that structure available to
+Rust applications so they can inspect or process it and check a content budget.
+It parses a defined Markdown subset using the Rust standard library. Identical
+source and aspect-ratio inputs produce an equal `Deck` every time.
 
 ## When / How
 
-Use it when you want a slide deck's structure (title, aspect ratio, per-slide
-elements) out of a small Markdown subset without pulling in a general-purpose
-Markdown/CommonMark implementation.
+Use it when your application needs a deck's title, aspect ratio, slides, and
+content elements from Markdown, with an optional content-limit check.
 
 The crate is not currently available on crates.io. Use the Git repository;
 Cargo discovers the package in its `scm/` subdirectory:
@@ -67,13 +66,23 @@ or render content. Empty decks are rejected under either policy.
 
 ## Known limitations
 
-- `Deck`/`Slide` model slide *structure*, not slide *rendering* — this crate
-  has no HTML/PDF export of its own (that lives in `pdf-engine`'s adapter
-  layer, which depends on Chromium and is not part of this crate).
+- The line budget is a heuristic. It does not measure fonts or visual layout.
 - Fenced code blocks are captured as plain text; the language tag after
   ` ``` ` (e.g. `rust`, `mermaid`) is not currently preserved.
 - Only `#`/`##` headings, paragraphs, fenced code, and `:::notes` blocks are
   recognized — this is a deliberate subset, not a CommonMark implementation.
+
+## Run the example
+
+From `scm/`, run:
+
+```sh
+cargo run --example basic
+```
+
+The example parses two slides and prints `parsed 2 slides` to the console.
+It does not write a file or invoke validation. The usage snippet above shows
+how to parse and then validate explicitly.
 
 ## Further reading
 

@@ -31,7 +31,6 @@ Do **not** open a public GitHub issue for security vulnerabilities.
   line by line without recursion. These scans and allocations scale linearly
   with input size; parsing is not a single pass over the original source.
 
-Because it has no dependencies, its supply-chain surface is limited to the
-Rust toolchain itself. Callers embedding untrusted Markdown should still apply
-their own input-size limits at the boundary, since this crate does not impose
-one.
+The library has no third-party Rust crate dependencies. Callers embedding
+untrusted Markdown should apply their own input-size limits at the boundary,
+since this crate does not impose one.

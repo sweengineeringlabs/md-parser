@@ -16,16 +16,17 @@
 
 ### Changed
 
+- Rewrote the project description and design rationale around the implemented
+  input, output, parsing, and validation behavior. Removed unverified origin
+  claims, external renderer references, and internal tool-audit notes.
 - **Breaking:** `parse_markdown` and `validate_deck` free functions are
   replaced by the `DeckParser` trait (`parse`/`validate` methods, taking
   `ParseRequest`/`ValidateRequest` and returning `ParseResponse`/`()`),
   implemented directly by `FactoryDeckParser`. The crate is not currently
   available on crates.io; Git/path consumers must migrate to the new API.
-- **Breaking:** the factory marker types are named `FactoryDeckParser` and
-  `FactoryValidator` (trait-name suffix), not `DeckParserFactory` /
-  `ValidatorFactory` — required by this org's `core_impl_name_has_trait_suffix`
-  architecture rule, since these types implement `DeckParser`/`Validator`
-  directly in `core/`.
+- **Breaking:** the default entry-point types are named `FactoryDeckParser`
+  and `FactoryValidator`, replacing `DeckParserFactory` / `ValidatorFactory`.
+  They implement `DeckParser` / `Validator` directly.
 - **Breaking:** MSRV raised from `1.95` to `1.98.1` (`rust-version` in
   `Cargo.toml`).
 
@@ -40,49 +41,12 @@
 - `DeckParser::validator()` default method — recovers a `Validator` from any
   `DeckParser` implementor.
 
-### Historical internal architecture-audit notes
-
-The following records an earlier run of the organization's internal `arch`
-SEA-compliance tool. The tool version and report are not checked into this
-repository, and CI does not run that audit. These notes have not been
-revalidated and do not establish the current tool's behavior or open GitHub
-issue status. That run reported two unresolved findings, described as
-contradictions between two of the tool's own rules, or a documented gap
-between a rule's stated behavior and its runtime behavior. A third,
-previously listed here (`app_type_forbids_saf` vs `app_type_requires_saf`
-reporting mutually exclusive application types for this crate in the same
-audit run), was reported resolved by moving trait implementations from
-`saf/` to `core/` in `ba7d9ea`.
-
-- `api_impl_public_tests_external` fired despite its own documented edge case
-  ("If api/ has no standalone pub fn ... this rule does not fire") — `api/`
-  had zero standalone `pub fn` (trait declarations only), checked via
-  `grep -rn "pub fn" main/src/api`.
-- `saf_impl_public_tests_external` / `trait_svc_fn_scenario_coverage` vs
-  `encapsulation.package_access_violation`: the latter banned re-exporting
-  *concrete types* from `saf/` (only trait re-exports are permitted); the
-  former two only recognized a re-exported *struct* as a valid "pub item" in a
-  `*_svc_factory.rs` file, not a re-exported trait. No arrangement of
-  `saf/deck_parser_svc_factory.rs` / `saf/validator_svc_factory.rs` was found to
-  satisfy both rule families simultaneously — tested in both
-  directions, including a `pub fn -> impl DeckParser` factory function
-  (opaque return type, no concrete-type re-export): it did not satisfy
-  `trait_svc_fn_scenario_coverage`, and its presence caused the audit run to
-  silently drop 61 unrelated structural rules from the report rather than
-  fail or skip them, so that workaround was rejected.
-
-Separately, `test_coverage_threshold` and `test_mutation_score` both reported
-`INTERNAL ERROR: builtin handler '<rule>' not registered` on that `arch`
-build — described as a gap in the `arch` binary itself (missing `cargo-llvm-cov` /
-`cargo-mutants` handler registration), not a finding about this crate.
-
 ## [1.9.7] — 2026-08-30
 
 ### Added
 
-- Initial standalone extraction of `pdf-engine-presentation` from
-  the `pdf-engine` monorepo (`scm/main/port/presentation`). Deterministic
-  Markdown deck parsing (`parse_markdown`) and fixed-canvas validation
+- Initial source version of `pdf-engine-presentation`. Deterministic
+  Markdown deck parsing (`parse_markdown`) and content-limit validation
   (`validate_deck`) with `Deck`, `Slide`, `SlideElement`, `AspectRatio`,
   `OverflowPolicy`, and `PresentationError` contracts. Zero runtime
   dependencies.

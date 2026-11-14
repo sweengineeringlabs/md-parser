@@ -132,10 +132,8 @@ this directory. Hosted docs.rs documentation is not currently available.
 
 ### Known limitations
 
-- No HTML/PDF rendering — this crate only produces the `Deck` data structure.
-  Rendering a parsed deck to slide HTML/PDF is out of scope; see the parent
-  [`pdf-engine`](https://github.com/sweengineeringlabs/pdf-engine) project's
-  presentation adapter for that.
+- The result is an in-memory `Deck` data structure. This library does not
+  render slides or write presentation, HTML, or PDF files.
 - Fenced code blocks do not currently preserve the language tag (e.g. `rust`
   vs `mermaid`) — each fenced block becomes one `SlideElement::Code`.
 - This is a deliberate Markdown subset, not a CommonMark implementation:

@@ -48,8 +48,7 @@ cargo publish
 `Cargo.toml` sets `publish = true` explicitly and declares the package
 version. For a subsequent release, bump the version and update `CHANGELOG.md`
 before publishing. After a successful first publication, update installation
-examples and documentation links to the actual published version. This crate
-has zero dependencies, so there is no publish-order concern with anything else.
+examples and documentation links to the actual published version.
 
 ## Commit policy
 

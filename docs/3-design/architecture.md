@@ -2,8 +2,9 @@
 
 ## What
 
-`pdf-engine-presentation` is a single library crate structured in SEA
-(port/adapter-style) layers:
+`pdf-engine-presentation` transforms Markdown text into a `Deck` and separately
+checks estimated slide content against a line budget. It is a single Rust
+library crate organized into three internal modules:
 
 - `api` — contracts and data declarations, with small default trait methods:
   - `api/traits/` — `DeckParser` (parse + validate a deck) and `Validator`
@@ -54,32 +55,27 @@ graph TD
 
 ## Why
 
-This crate is extracted from the `pdf-engine` monorepo's
-`main/port/presentation` module, where it served as the "port" half of a
-hexagonal port/adapter pair: `pdf-engine-presentation` defines the pure
-parsing/validation contract, and a separate `pdf-engine-adapter-presentation`
-crate (which stays inside the monorepo) implements Chromium-based PDF/HTML
-rendering on top of it.
+The input is source text plus a default aspect ratio. The output is a deck
+containing metadata, ordered slides, and ordered content elements. The parser
+tracks code and notes blocks so their contents remain distinct from ordinary
+slide text. These operations use only the Rust standard library.
 
-That split is why this crate has zero dependencies and no rendering code of
-its own: parsing Markdown into a `Deck` and deciding whether it fits a fixed
-canvas are both pure, deterministic, and independently useful — worth
-depending on directly without pulling in a Chromium-based rendering pipeline.
-Standing it up as its own crate makes that boundary a real one instead of an
-internal convention: consumers who only need the parsing/validation contract
-(for example, a project needing a similar dependency-free Markdown subset
-parser) can depend on this standalone Git repository without depending on
-the parent monorepo. The crate is not currently available on crates.io.
+Validation is explicit because successfully parsing text and meeting a slide
+content budget are separate conditions. A caller can inspect a parsed deck
+even when it exceeds the budget. Validation reads the deck without modifying
+it and returns an error for an empty deck or a rejected overflow.
+
+`api/` defines the types and callable contracts, `core/` implements parsing
+and validation, and `saf/` exposes them through the crate root. The public
+result is in-memory data; this library has no rendering or file-export API.
 
 ### Why a trait, not free functions
 
-The crate originally exposed `parse_markdown`/`validate_deck` as free
-functions. It now exposes them as the `DeckParser` trait, implemented
-directly by `FactoryDeckParser`, for two reasons: the trait gives callers a substitutable
-seam (a test double can stand in for `DeckParser` without touching real
-parsing logic — see `tests/deck_parser_int_test.rs`), and it lets the crate's
-internal layering keep parsing and validation logic inside `core/`, with
-`api/` exposing contracts, data, and default entry-point methods.
+`DeckParser` defines parsing and validation operations. `FactoryDeckParser`
+implements that contract as the default entry point. Callers can provide a
+different implementation, including a test implementation as demonstrated in
+`scm/tests/deck_parser_int_test.rs`. Parsing and validation logic stays in
+`core/`, while `api/` exposes the contract and data.
 
 ### Why `Validator` as well as `DeckParser::validate`
 
@@ -112,7 +108,7 @@ flowchart TD
     Validate["DeckParser::validate / Validator::validate<br/>sums a deterministic per-slide line estimate"]
     Overflow(["Err(PresentationError::SlideOverflow)<br/>or Err(ValidationError { violations })"])
     Valid(["Ok(())"])
-    Render["caller renders the validated Deck<br/>(out of scope for this crate)"]
+    Consumer["caller inspects or processes the Deck"]
     ParseErr(["Err: EmptyDeck / MalformedSource"])
     EmptyErr(["Err: EmptyDeck<br/>or ValidationError { violations }"])
 
@@ -123,7 +119,7 @@ flowchart TD
     Validate -->|"deck has no slides, under either policy"| EmptyErr
     Validate -->|"overflow_policy = Reject and over budget"| Overflow
     Validate -->|"nonempty deck: Clip, or within budget"| Valid
-    Valid --> Render
+    Valid --> Consumer
 ```
 
 ## Error handling
