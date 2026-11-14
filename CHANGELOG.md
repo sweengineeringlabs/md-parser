@@ -8,6 +8,14 @@
   conflict. Installation remains Git-based; the registry package `md-parser`
   belongs to another project, not this library.
 
+## [1.9.11] — 2026-11-14
+
+### Changed
+
+- Preserves contiguous Markdown lines as paragraph blocks for rich downstream
+  rendering, recognizes all six ATX heading levels, and counts explicit
+  paragraph lines in overflow estimates.
+
 ## [1.9.10] — 2026-11-14
 
 ### Changed

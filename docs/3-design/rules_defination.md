@@ -3,8 +3,9 @@
 This document defines `md-parser` source conventions and validation behavior for the
 default `FactoryDeckParser` and `FactoryValidator` implementations. Markdown
 has no slide model: `---` slide separators and `:::notes` blocks are conventions
-defined by this library. This is a restricted text format, not a full
-CommonMark, YAML, or TOML implementation.
+defined by this library. Deck parsing is deliberately small; ordinary Markdown
+blocks are preserved as paragraph source for the presentation renderer. The
+parser does not interpret their CommonMark syntax.
 
 The [architecture](architecture.md) describes how the code implements these
 rules. Update this document and the corresponding tests together when changing
@@ -97,19 +98,22 @@ Outside code and notes, recognition uses trimmed lines in this order:
 2. A line equal to `---`: end the current slide if it has elements.
 3. A line equal to `:::notes`, case-insensitively: enter notes mode.
 4. A line starting with three backticks: enter code mode.
-5. A line starting with `# ` or `## `: create a level 1 or 2 heading.
-6. Any other nonempty line: create one paragraph element.
+5. A line starting with one to six `#` characters followed by a space: create
+   a level 1–6 heading.
+6. Any other nonempty line: append it to the current paragraph block.
 
-Blank lines outside blocks are ignored. Adjacent paragraph lines remain separate
-elements. Heading text is the trimmed line after its prefix; inline formatting
-and trailing heading markers are not interpreted. Leading, trailing, or repeated
-slide separators do not create empty slides. Remaining elements form the last
-slide at end of input.
+Blank lines outside blocks end the current paragraph block. Adjacent nonempty
+lines are joined with LF and preserved in one `Paragraph(String)`. Heading text
+is the trimmed line after its prefix; inline formatting and trailing heading
+markers remain uninterpreted source text. Leading, trailing, or repeated slide
+separators do not create empty slides. Remaining elements form the last slide at
+end of input.
 
 In ordinary content, `---` separates slides even where Markdown would interpret
 it as a horizontal rule or another construct. Lists, links, emphasis, tables,
-images, and `###` or deeper headings have no special model; their source text
-becomes paragraph text.
+images, and other ordinary Markdown blocks are preserved inside paragraph
+source. They are not recognized or validated by this crate; a downstream
+renderer may interpret them.
 
 ### Fenced code
 
@@ -149,7 +153,7 @@ implementations apply the same rules and leave the deck unchanged.
 | Element | Estimated lines |
 |---------|-----------------|
 | Heading | 2 |
-| Paragraph | Unicode scalar-value count divided by 90, rounded up; minimum 1 |
+| Paragraph | Maximum of nonempty physical line count and Unicode scalar-value count divided by 90, rounded up; minimum 1 |
 | Code | Rust `str::lines().count()`; minimum 1 |
 | Notes | 0 |
 

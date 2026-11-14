@@ -7,6 +7,47 @@ use md_parser::{
 
 /// @covers: DeckParser
 #[test]
+fn test_paragraph_blocks_preserve_rich_markdown_source() {
+    let response = FactoryDeckParser
+        .parse(ParseRequest {
+            source: "A paragraph\nwith **strong text** and a [link](https://example.com).\n\n- first item\n- second item\n\n> quoted text\n> continued quote".to_string(),
+            default_aspect_ratio: AspectRatio::Widescreen16x9,
+        })
+        .unwrap_or_else(|error| panic!("rich Markdown fixture failed: {error}"));
+    assert_eq!(
+        response.deck.slides[0].elements,
+        vec![
+            SlideElement::Paragraph(
+                "A paragraph\nwith **strong text** and a [link](https://example.com).".to_string()
+            ),
+            SlideElement::Paragraph("- first item\n- second item".to_string()),
+            SlideElement::Paragraph("> quoted text\n> continued quote".to_string()),
+        ]
+    );
+}
+
+/// @covers: DeckParser
+#[test]
+fn test_all_common_heading_levels_are_preserved() {
+    let response = FactoryDeckParser
+        .parse(ParseRequest {
+            source: "# One\n## Two\n### Three\n#### Four\n##### Five\n###### Six".to_string(),
+            default_aspect_ratio: AspectRatio::Widescreen16x9,
+        })
+        .unwrap_or_else(|error| panic!("heading fixture failed: {error}"));
+    let levels: Vec<_> = response.deck.slides[0]
+        .elements
+        .iter()
+        .filter_map(|element| match element {
+            SlideElement::Heading { level, .. } => Some(*level),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(levels, vec![1, 2, 3, 4, 5, 6]);
+}
+
+/// @covers: DeckParser
+#[test]
 fn test_fenced_code_preserves_blocks_and_blank_lines() {
     let cases = [
         ("```rust\nhello\n```", vec!["hello"]),

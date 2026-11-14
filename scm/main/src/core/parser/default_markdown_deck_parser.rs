@@ -63,10 +63,16 @@ impl DefaultMarkdownDeckParser {
         let mut in_code = false;
         let mut code_lines = Vec::new();
         let mut in_notes = false;
+        let mut paragraph_lines = Vec::new();
 
         for line in content.lines() {
             let trimmed = line.trim();
-            if slides.is_empty() && current.is_empty() && !in_code && !in_notes {
+            if slides.is_empty()
+                && current.is_empty()
+                && paragraph_lines.is_empty()
+                && !in_code
+                && !in_notes
+            {
                 if trimmed.starts_with("title:") {
                     Self::apply_metadata_line(trimmed, &mut title, &mut resolved_aspect_ratio)?;
                     continue;
@@ -77,6 +83,7 @@ impl DefaultMarkdownDeckParser {
                 }
             }
             if trimmed == "---" && !in_code && !in_notes {
+                Self::flush_paragraph(&mut paragraph_lines, &mut current);
                 if !current.is_empty() {
                     slides.push(Slide {
                         elements: std::mem::take(&mut current),
@@ -85,6 +92,7 @@ impl DefaultMarkdownDeckParser {
                 continue;
             }
             if trimmed.eq_ignore_ascii_case(":::notes") && !in_code {
+                Self::flush_paragraph(&mut paragraph_lines, &mut current);
                 in_notes = true;
                 continue;
             }
@@ -97,6 +105,7 @@ impl DefaultMarkdownDeckParser {
                 continue;
             }
             if trimmed.starts_with("```") {
+                Self::flush_paragraph(&mut paragraph_lines, &mut current);
                 in_code = !in_code;
                 if !in_code {
                     current.push(SlideElement::Code(code_lines.join("\n")));
@@ -108,18 +117,16 @@ impl DefaultMarkdownDeckParser {
                 code_lines.push(line);
                 continue;
             }
-            if let Some(text) = trimmed.strip_prefix("# ") {
+            if let Some((level, text)) = Self::heading(trimmed) {
+                Self::flush_paragraph(&mut paragraph_lines, &mut current);
                 current.push(SlideElement::Heading {
-                    level: 1,
+                    level,
                     text: text.to_string(),
                 });
-            } else if let Some(text) = trimmed.strip_prefix("## ") {
-                current.push(SlideElement::Heading {
-                    level: 2,
-                    text: text.to_string(),
-                });
-            } else if !trimmed.is_empty() {
-                current.push(SlideElement::Paragraph(trimmed.to_string()));
+            } else if trimmed.is_empty() {
+                Self::flush_paragraph(&mut paragraph_lines, &mut current);
+            } else {
+                paragraph_lines.push(line.trim_end().to_string());
             }
         }
         if in_code || in_notes {
@@ -127,6 +134,7 @@ impl DefaultMarkdownDeckParser {
                 "unterminated presentation block".to_string(),
             ));
         }
+        Self::flush_paragraph(&mut paragraph_lines, &mut current);
         if !current.is_empty() {
             slides.push(Slide { elements: current });
         }
@@ -139,6 +147,26 @@ impl DefaultMarkdownDeckParser {
             slides,
             overflow_policy: OverflowPolicy::Reject,
         })
+    }
+
+    fn heading(line: &str) -> Option<(u8, &str)> {
+        let level = line
+            .chars()
+            .take_while(|character| *character == '#')
+            .count();
+        if !(1..=6).contains(&level) {
+            return None;
+        }
+        let rest = line.get(level..)?;
+        let text = rest.strip_prefix(' ')?;
+        Some((level as u8, text.trim()))
+    }
+
+    fn flush_paragraph(lines: &mut Vec<String>, elements: &mut Vec<SlideElement>) {
+        if !lines.is_empty() {
+            elements.push(SlideElement::Paragraph(lines.join("\n")));
+            lines.clear();
+        }
     }
 
     /// Validates deterministic fixed-canvas constraints before rendering.
@@ -155,7 +183,12 @@ impl DefaultMarkdownDeckParser {
                 .iter()
                 .map(|element| match element {
                     SlideElement::Heading { .. } => 2,
-                    SlideElement::Paragraph(text) => text.chars().count().div_ceil(90).max(1),
+                    SlideElement::Paragraph(text) => {
+                        let physical_lines =
+                            text.lines().filter(|line| !line.trim().is_empty()).count();
+                        let wrapped_lines = text.chars().count().div_ceil(90);
+                        physical_lines.max(wrapped_lines).max(1)
+                    }
                     SlideElement::Code(text) => text.lines().count().max(1),
                     SlideElement::Notes(_) => 0,
                 })
