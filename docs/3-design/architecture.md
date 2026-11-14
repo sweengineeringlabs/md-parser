@@ -1,5 +1,10 @@
 # Architecture
 
+The [rules definition](rules_defination.md) is the reference for source syntax,
+slide conventions, metadata, validation limits, and error behavior. This
+document explains the module structure and design decisions that implement
+those rules.
+
 ## What
 
 `pdf-engine-presentation` transforms Markdown text into a `Deck` and separately
@@ -34,6 +39,20 @@ library crate organized into three internal modules:
 from the crate root (`pdf_engine_presentation::{DeckParser, FactoryDeckParser,
 ParseRequest, ...}`), never from `api`/`core`/`saf` directly — those module
 names are an internal organizational detail, not part of the public API.
+
+The public operations are:
+
+| Operation | Result |
+|-----------|--------|
+| `DeckParser::parse(ParseRequest)` | `ParseResponse` containing `Arc<Deck>`, or `PresentationError` |
+| `DeckParser::validate(ValidateRequest)` | `()`, or structured `PresentationError` |
+| `DeckParser::validator(GetValidatorRequest)` | `GetValidatorResponse` containing `Arc<dyn Validator>`; the default uses `FactoryValidator` |
+| `Validator::validate(ValidateRequest)` | `()`, or `ValidationError` with human-readable violations |
+
+`FactoryDeckParser` and `FactoryValidator` are directly usable default
+implementations. Each trait's `factory()` method returns its default entry
+point independently of the caller's implementation. Generate the complete
+API reference with `cargo doc --no-deps --open` from `scm/`.
 
 ```mermaid
 graph TD
@@ -134,13 +153,3 @@ forbids unsafe code at the crate level. Parse and validation failures return a
 `PresentationError` (or, through `Validator`, a `ValidationError`) with
 enough context — the offending slide number, the estimated line count, or a
 message — for a caller to act on without re-parsing the source.
-
-## Validation limits
-
-Parsing does not automatically validate. The caller invokes `validate()`
-on the resulting deck. Both aspect ratios use a 34-line budget: headings
-count as two lines, paragraphs as one per 90 characters rounded up (minimum
-one), code as `str::lines().count()` (minimum one), and notes as zero.
-The first overflow is reported. `OverflowPolicy::Clip` skips overflow
-rejection; no content is modified or clipped here. Empty decks are rejected
-under either policy. This is a content estimate, not a font/layout measurement.

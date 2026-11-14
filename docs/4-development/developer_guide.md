@@ -94,6 +94,10 @@ the policy is broader than the automated pattern checks.
    the opposite: private functions there need an inline `#[cfg(test)] mod
    tests` block in the same file, and public ones still need an external
    `tests/` file. Every test needs an `/// @covers: <item_name>` doc comment.
-4. Update [`scm/README.md`](../../scm/README.md)'s API surface table and, if
-   the change affects design rationale, [`architecture.md`](../3-design/architecture.md).
+4. Update the item's API documentation. For changes to source syntax or
+   validation behavior, update the [rules definition](../3-design/rules_defination.md)
+   and its corresponding tests together. Update
+   [architecture.md](../3-design/architecture.md) when module structure or
+   design rationale changes. Keep READMEs focused on the introduction and
+   quick start.
 5. Add a `CHANGELOG.md` entry under `[Unreleased]`.

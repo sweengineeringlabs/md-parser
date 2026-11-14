@@ -16,6 +16,9 @@
 
 ### Changed
 
+- Centralized source and validation rules in
+  `docs/3-design/rules_defination.md`, referenced from the architecture and
+  developer guides. Reduced both READMEs to an introduction and quick start.
 - Rewrote the project description and design rationale around the implemented
   input, output, parsing, and validation behavior. Removed unverified origin
   claims, external renderer references, and internal tool-audit notes.
