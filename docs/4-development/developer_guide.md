@@ -72,9 +72,13 @@ commands above are additional local checks.
 
 ## Publishing
 
-The crate is not currently available on crates.io, and hosted docs.rs
-documentation is not available yet. Installation examples use the Git
-repository. The package's `version` is not evidence of a registry release.
+This implementation is distributed from Git. The crates.io name `md-parser`
+is registered to a different project (`parsing-tech/md-rs`, owner `xieyuheng`);
+its existing release is not this library. Registry publication is blocked on
+resolving package naming or obtaining appropriate ownership/access, tracked in
+[pdf-engine issue #15](https://github.com/sweengineeringlabs/pdf-engine/issues/15).
+Do not substitute a registry-only dependency for the documented Git dependency.
+The package version and successful dry runs are not evidence of publication.
 
 ```sh
 cargo publish --dry-run   # verify packaging before every real publish
@@ -83,8 +87,32 @@ cargo publish
 
 `Cargo.toml` sets `publish = true` explicitly and declares the package
 version. For a subsequent release, bump the version and update `CHANGELOG.md`
-before publishing. After a successful first publication, update installation
-examples and documentation links to the actual published version.
+before publishing. Only publish after the registry-name decision and relevant
+credentials are resolved. After a successful first publication, update
+installation examples and documentation links to the actual published package.
+
+## Public API and versioning
+
+From `v1.9.10`, the supported public contract consists of the crate-root exports
+and the documented source/validation behavior in the
+[rules definition](../3-design/rules_defination.md). The public contract includes
+the parser/validator traits, default entry points, request/response types,
+deck/slide/element types, and errors. Internal `api/`, `core/`, and `saf/`
+organization is not a consumer-facing API.
+
+For the 1.x Git releases, use the following versioning policy:
+
+| Change | Required version change |
+|--------|-------------------------|
+| Incompatible public type, trait, signature, or documented parsing/validation behavior | Major |
+| Backward-compatible public functionality | Minor |
+| Bug fix restoring documented behavior, or documentation-only correction | Patch |
+| Increased minimum supported Rust version | At least minor, with release notes |
+
+Renames and ownership changes must include explicit consumer migration notes.
+The earlier rename and API history remain recorded in `CHANGELOG.md`; this
+policy does not retroactively assert compatibility across older tags. Document
+behavioral changes and update the rules and tests in the same change.
 
 ## Commit policy
 

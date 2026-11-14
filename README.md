@@ -7,7 +7,8 @@ in memory; it does not render slides or generate presentation files.
 
 ## Quick start
 
-Add the Git dependency to your application's `Cargo.toml`:
+Add the Git dependency to your application's `Cargo.toml`. The crates.io
+package named `md-parser` is a different project.
 
 ```toml
 [dependencies]

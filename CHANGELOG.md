@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Documented the public API/versioning policy and the crates.io package-name
+  conflict. Installation remains Git-based; the registry package `md-parser`
+  belongs to another project, not this library.
+
 ## [1.9.10] — 2026-11-14
 
 ### Changed

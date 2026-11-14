@@ -6,7 +6,8 @@ and returns an in-memory `Deck`; it does not render or export presentations.
 
 ## Quick start
 
-Add the Git dependency to your application's `Cargo.toml`:
+Add the Git dependency to your application's `Cargo.toml`. The crates.io
+package named `md-parser` is a different project.
 
 ```toml
 [dependencies]
