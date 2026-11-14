@@ -8,7 +8,7 @@ pub trait Validator {
     /// message in `ValidationError::violations`.
     fn validate(&self, request: ValidateRequest) -> Result<(), ValidationError>;
 
-    /// Returns the factory used to construct implementations of this trait.
+    /// Returns the default validator entry point, independently of `Self`.
     fn factory() -> FactoryValidator
     where
         Self: Sized,

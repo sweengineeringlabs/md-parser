@@ -11,6 +11,6 @@ pub struct Deck {
     pub aspect_ratio: AspectRatio,
     /// Slides in source order.
     pub slides: Vec<Slide>,
-    /// Content overflow behavior for PDF export.
+    /// Policy controlling estimated content overflow during validation.
     pub overflow_policy: OverflowPolicy,
 }

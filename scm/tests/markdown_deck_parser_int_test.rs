@@ -7,6 +7,97 @@ use pdf_engine_presentation::{
 
 /// @covers: DeckParser
 #[test]
+fn test_fenced_code_preserves_blocks_and_blank_lines() {
+    let cases = [
+        ("```rust\nhello\n```", vec!["hello"]),
+        ("```\n```", vec![""]),
+        ("```\n\nhello\n\n\n```", vec!["\nhello\n\n"]),
+        ("```\nfirst\n```\n```\nsecond\n```", vec!["first", "second"]),
+        (
+            "```\ntitle: code\naspect_ratio: text\n---\n:::notes\n```",
+            vec!["title: code\naspect_ratio: text\n---\n:::notes"],
+        ),
+    ];
+    for (source, expected) in cases {
+        let response = FactoryDeckParser
+            .parse(ParseRequest {
+                source: source.to_string(),
+                default_aspect_ratio: AspectRatio::Widescreen16x9,
+            })
+            .unwrap_or_else(|error| panic!("code fixture failed: {error}"));
+        let expected_elements: Vec<_> = expected
+            .into_iter()
+            .map(|text| SlideElement::Code(text.to_string()))
+            .collect();
+        assert_eq!(response.deck.slides.len(), 1);
+        assert_eq!(
+            response.deck.slides[0].elements, expected_elements,
+            "{source:?}"
+        );
+        assert!(response.deck.title.is_empty());
+    }
+}
+
+/// @covers: DeckParser
+#[test]
+fn test_code_line_budget_boundary() {
+    for line_count in [34, 35] {
+        let response = FactoryDeckParser
+            .parse(ParseRequest {
+                source: format!("```\n{}```", "code\n".repeat(line_count)),
+                default_aspect_ratio: AspectRatio::Widescreen16x9,
+            })
+            .unwrap_or_else(|error| panic!("code fixture failed: {error}"));
+        let result = FactoryDeckParser.validate(ValidateRequest {
+            deck: response.deck,
+        });
+        if line_count == 34 {
+            assert_eq!(result, Ok(()));
+        } else {
+            assert_eq!(
+                result,
+                Err(PresentationError::SlideOverflow {
+                    slide: 1,
+                    estimated_lines: 35
+                })
+            );
+        }
+    }
+}
+
+/// @covers: DeckParser
+#[test]
+fn test_notes_preserve_metadata_and_slide_markers() {
+    let response = FactoryDeckParser
+        .parse(ParseRequest {
+            source: ":::notes\ntitle: secret\n---\n:::\n# Slide".to_string(),
+            default_aspect_ratio: AspectRatio::Standard4x3,
+        })
+        .unwrap_or_else(|error| panic!("notes fixture failed: {error}"));
+    assert!(response.deck.title.is_empty());
+    assert_eq!(response.deck.slides.len(), 1);
+    assert_eq!(
+        response.deck.slides[0].elements,
+        vec![
+            SlideElement::Notes("title: secret".to_string()),
+            SlideElement::Notes("---".to_string()),
+            SlideElement::Heading {
+                level: 1,
+                text: "Slide".to_string()
+            },
+        ]
+    );
+    assert!(matches!(
+        FactoryDeckParser.parse(ParseRequest {
+            source: ":::notes\nsecret\n---\n# Next".to_string(),
+            default_aspect_ratio: AspectRatio::Standard4x3,
+        }),
+        Err(PresentationError::MalformedSource(_))
+    ));
+}
+
+/// @covers: DeckParser
+#[test]
 fn test_parse_notes_and_code_source_order_happy() {
     let response = FactoryDeckParser
         .parse(ParseRequest {

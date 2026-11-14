@@ -5,24 +5,25 @@
 `pdf-engine-presentation` is a single library crate structured in SEA
 (port/adapter-style) layers:
 
-- `api` — pure declarations, no logic:
+- `api` — contracts and data declarations, with small default trait methods:
   - `api/traits/` — `DeckParser` (parse + validate a deck) and `Validator`
     (generic itemized validation), each with a default `factory()` method.
   - `api/types/` — `Deck`, `Slide`, `SlideElement`, `AspectRatio`,
     `OverflowPolicy`; `api/types/factory/` — `FactoryDeckParser`,
     `FactoryValidator` — one type per file.
-  - `api/dto/` — `ParseRequest`, `ParseResponse`, `ValidateRequest`, the
-    request/response types `DeckParser`'s methods use.
+  - `api/dto/` — `ParseRequest`, `ParseResponse`, `ValidateRequest`,
+    `GetValidatorRequest`, `GetValidatorResponse`: the request/response types
+    `DeckParser`'s methods use.
   - `api/error/` — `PresentationError`, `ValidationError` (declarations only).
 - `core/parser/` — the real logic: `DefaultMarkdownDeckParser` (implements
   `DeckParser`) and `DefaultDeckValidator` (implements `Validator`, adapting
   `DefaultMarkdownDeckParser`'s validation into `Validator`'s itemized-error
   shape). This is also where `FactoryDeckParser`/`FactoryValidator` (declared
   in `api/`) get their own `DeckParser`/`Validator` impls, each delegating to
-  the `Default*` type — `saf/` must stay construction-only, so trait impls for
+  the `Default*` type — `saf/` is a re-export facade, so trait impls for
   `api/`-declared types live in `core/`, not `saf/`. `core/error/` holds
   `PresentationError`'s `Display`/`Error` impls.
-- `saf` — construction only: `deck_parser_svc_factory.rs` and
+- `saf` — public re-export facade: `deck_parser_svc_factory.rs` and
   `validator_svc_factory.rs` each re-export their respective port trait
   (`DeckParser`, `Validator`) through the facade. The production
   implementations (`FactoryDeckParser`, `FactoryValidator`) are reachable via
@@ -67,8 +68,8 @@ depending on directly without pulling in a Chromium-based rendering pipeline.
 Standing it up as its own crate makes that boundary a real one instead of an
 internal convention: consumers who only need the parsing/validation contract
 (for example, a project needing a similar dependency-free Markdown subset
-parser) can depend on it from crates.io without a path/git dependency into a
-private monorepo.
+parser) can depend on this standalone Git repository without depending on
+the parent monorepo. The crate is not currently available on crates.io.
 
 ### Why a trait, not free functions
 
@@ -77,8 +78,8 @@ functions. It now exposes them as the `DeckParser` trait, implemented
 directly by `FactoryDeckParser`, for two reasons: the trait gives callers a substitutable
 seam (a test double can stand in for `DeckParser` without touching real
 parsing logic — see `tests/deck_parser_int_test.rs`), and it lets the crate's
-internal layering keep all real logic inside `core/`, with `api/` staying a
-pure, dependency-free contract surface.
+internal layering keep parsing and validation logic inside `core/`, with
+`api/` exposing contracts, data, and default entry-point methods.
 
 ### Why `Validator` as well as `DeckParser::validate`
 
@@ -113,13 +114,15 @@ flowchart TD
     Valid(["Ok(())"])
     Render["caller renders the validated Deck<br/>(out of scope for this crate)"]
     ParseErr(["Err: EmptyDeck / MalformedSource"])
+    EmptyErr(["Err: EmptyDeck<br/>or ValidationError { violations }"])
 
     Source --> Parse
     Parse -->|"parse error"| ParseErr
     Parse -->|"parsed"| Response
-    Response --> Validate
+    Response -->|"caller explicitly invokes validation"| Validate
+    Validate -->|"deck has no slides, under either policy"| EmptyErr
     Validate -->|"overflow_policy = Reject and over budget"| Overflow
-    Validate -->|"overflow_policy = Clip, or within budget"| Valid
+    Validate -->|"nonempty deck: Clip, or within budget"| Valid
     Valid --> Render
 ```
 
@@ -127,10 +130,21 @@ flowchart TD
 
 `PresentationError` is declared in `api/error/presentation_error.rs`; its
 `std::error::Error` and `Display` impls live in `core/error/display.rs` so
-that `api/` stays declarations-only. `ValidationError` is a plain struct
-wrapping `Vec<String>`. No `unwrap`/`expect` anywhere in the parser (enforced
-by `#![deny(unsafe_code)]` at the crate level and `unwrap_used`/`expect_used
-= "deny"` lint configuration in `Cargo.toml`). Every failure path returns a
+that error-formatting logic stays in `core/`. `ValidationError` is a plain
+struct wrapping `Vec<String>`. No `unwrap`/`expect` is used in the parser;
+Clippy enforces this through the `unwrap_used`/`expect_used = "deny"` lint
+configuration in `Cargo.toml`. Independently, `#![deny(unsafe_code)]`
+forbids unsafe code at the crate level. Parse and validation failures return a
 `PresentationError` (or, through `Validator`, a `ValidationError`) with
 enough context — the offending slide number, the estimated line count, or a
 message — for a caller to act on without re-parsing the source.
+
+## Validation limits
+
+Parsing does not automatically validate. The caller invokes `validate()`
+on the resulting deck. Both aspect ratios use a 34-line budget: headings
+count as two lines, paragraphs as one per 90 characters rounded up (minimum
+one), code as `str::lines().count()` (minimum one), and notes as zero.
+The first overflow is reported. `OverflowPolicy::Clip` skips overflow
+rejection; no content is modified or clipped here. Empty decks are rejected
+under either policy. This is a content estimate, not a font/layout measurement.

@@ -1,2 +1,2 @@
-/// Constructs [`DeckParser`](crate::api::DeckParser) implementations.
+/// Default [`DeckParser`](crate::api::DeckParser) implementation and entry point.
 pub struct FactoryDeckParser;

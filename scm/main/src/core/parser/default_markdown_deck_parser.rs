@@ -31,8 +31,8 @@ impl DeckParser for FactoryDeckParser {
 }
 
 impl DefaultMarkdownDeckParser {
-    /// Parses a deterministic Markdown deck. Slides begin with a `---` marker;
-    /// speaker notes use a `:::notes` block terminated by the next slide marker.
+    /// Parses a deterministic Markdown deck. Slides are separated by `---`;
+    /// speaker notes use a `:::notes` block terminated by `:::`.
     fn parse_markdown(source: &str, aspect_ratio: AspectRatio) -> Result<Deck, PresentationError> {
         let normalized = source.replace("\r\n", "\n").replace('\r', "\n");
         let mut slides = Vec::new();
@@ -61,11 +61,12 @@ impl DefaultMarkdownDeckParser {
         }
         let mut current = Vec::new();
         let mut in_code = false;
+        let mut code_lines = Vec::new();
         let mut in_notes = false;
 
         for line in content.lines() {
             let trimmed = line.trim();
-            if slides.is_empty() && current.is_empty() {
+            if slides.is_empty() && current.is_empty() && !in_code && !in_notes {
                 if trimmed.starts_with("title:") {
                     Self::apply_metadata_line(trimmed, &mut title, &mut resolved_aspect_ratio)?;
                     continue;
@@ -98,19 +99,13 @@ impl DefaultMarkdownDeckParser {
             if trimmed.starts_with("```") {
                 in_code = !in_code;
                 if !in_code {
-                    current.push(SlideElement::Code(String::new()));
+                    current.push(SlideElement::Code(code_lines.join("\n")));
+                    code_lines.clear();
                 }
                 continue;
             }
             if in_code {
-                match current.last_mut() {
-                    Some(SlideElement::Code(text)) if !text.is_empty() => {
-                        text.push('\n');
-                        text.push_str(line);
-                    }
-                    Some(SlideElement::Code(text)) => text.push_str(line),
-                    _ => current.push(SlideElement::Code(line.to_string())),
-                }
+                code_lines.push(line);
                 continue;
             }
             if let Some(text) = trimmed.strip_prefix("# ") {

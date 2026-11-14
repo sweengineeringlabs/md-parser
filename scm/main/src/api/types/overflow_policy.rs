@@ -3,6 +3,7 @@
 pub enum OverflowPolicy {
     /// Reject the deck with an actionable validation error.
     Reject,
-    /// Keep the fixed canvas and clip content at its boundary.
+    /// Skip overflow rejection during validation. Rendering and clipping
+    /// are the caller's responsibility; empty decks are still rejected.
     Clip,
 }

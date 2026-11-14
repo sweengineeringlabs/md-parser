@@ -1,12 +1,12 @@
 # Source
 
 This is the Cargo package for `pdf-engine-presentation` — see the
-[root README](../README.md) for what/why/how. This file documents the crate
+[root README](https://github.com/sweengineeringlabs/pdf-engine-presentation/blob/main/README.md) for what/why/how. This file documents the crate
 layout and the full API surface; for the design rationale and the development
 workflow, see:
 
-- [Architecture](../docs/3-design/architecture.md)
-- [Developer guide](../docs/4-development/developer_guide.md)
+- [Architecture](https://github.com/sweengineeringlabs/pdf-engine-presentation/blob/main/docs/3-design/architecture.md)
+- [Developer guide](https://github.com/sweengineeringlabs/pdf-engine-presentation/blob/main/docs/4-development/developer_guide.md)
 
 ## Crate layout
 
@@ -23,6 +23,7 @@ scm/
 │   │   ├── types/   Deck, Slide, SlideElement, AspectRatio, OverflowPolicy;
 │   │   │            types/factory/ — FactoryDeckParser, FactoryValidator
 │   │   ├── dto/     ParseRequest, ParseResponse, ValidateRequest
+│   │   │            GetValidatorRequest, GetValidatorResponse
 │   │   ├── error/   PresentationError, ValidationError (declarations only)
 │   │   └── parser/  marker module pairing the `parser` domain with core/parser/
 │   ├── core/
@@ -40,21 +41,30 @@ scm/
 
 ## API surface
 
+The crate is not currently available on crates.io. Use the Git dependency
+(Cargo discovers the package in `scm/`):
+
 ```toml
 [dependencies]
-pdf-engine-presentation = "1.9"
+pdf-engine-presentation = { git = "https://github.com/sweengineeringlabs/pdf-engine-presentation" }
 ```
 
 ```rust
-use pdf_engine_presentation::{AspectRatio, DeckParser, FactoryDeckParser, ParseRequest};
+use pdf_engine_presentation::{
+    AspectRatio, DeckParser, FactoryDeckParser, ParseRequest, ValidateRequest,
+};
 
-let response = FactoryDeckParser.parse(ParseRequest {
-    source: "+++\ntitle = \"Quarterly Review\"\naspect_ratio = \"16:9\"\n+++\n# Results\n\nRevenue increased 20%.\n---\n## Appendix".to_string(),
-    default_aspect_ratio: AspectRatio::Widescreen16x9,
-})?;
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let response = FactoryDeckParser.parse(ParseRequest {
+        source: "+++\ntitle = \"Quarterly Review\"\naspect_ratio = \"16:9\"\n+++\n# Results\n\nRevenue increased 20%.\n---\n## Appendix".to_string(),
+        default_aspect_ratio: AspectRatio::Widescreen16x9,
+    })?;
 
-assert_eq!(response.deck.title, "Quarterly Review");
-assert_eq!(response.deck.slides.len(), 2);
+    assert_eq!(response.deck.title, "Quarterly Review");
+    assert_eq!(response.deck.slides.len(), 2);
+    FactoryDeckParser.validate(ValidateRequest { deck: response.deck })?;
+    Ok(())
+}
 ```
 
 | Item | What it does |
@@ -78,19 +88,47 @@ assert_eq!(response.deck.slides.len(), 2);
 
 ### Source syntax
 
-- Slides are separated by a line containing only `---`.
+- Slides are separated by a line containing only `---` (surrounding whitespace
+  is ignored), outside code and notes. Empty slides are omitted.
 - `# Heading` and `## Heading` produce `SlideElement::Heading { level, text }`;
   any other non-empty, non-fenced line becomes a `SlideElement::Paragraph`.
 - ` ``` `-fenced blocks become a single `SlideElement::Code` (language tags
   after the opening fence are not currently captured).
-- `:::notes` / `:::` blocks become `SlideElement::Notes` lines, excluded from
-  rendering by default but retained in the parsed deck.
+- `:::notes` / `:::` blocks become `SlideElement::Notes` lines, retained in
+  the parsed deck and ignored by the line estimate. Callers control rendering.
+  The opening directive is case-insensitive. Only `:::` closes notes;
+  `---` inside notes is content. Unclosed code or notes returns an error.
 - Optional front matter, before the first slide, sets `title` and
   `aspect_ratio` (`16:9`/`16x9` or `4:3`/`4x3`):
   - YAML-style: `---` delimited block of `key: value` lines.
   - TOML-style: `+++` delimited block of `key = value` lines.
   - Or bare `title:` / `aspect_ratio:` lines before the first slide, with no
     delimiters at all.
+
+Front matter must start at the beginning of the source. These syntaxes only
+support the two listed keys, optional surrounding quotes, and simple scalar
+values; they do not implement general YAML/TOML escaping, comments, or nesting.
+A YAML-style block is recognized only if every line has a supported key;
+blank lines or unsupported keys make it fall back to ordinary slide parsing.
+An unclosed YAML-style block also falls back to slide parsing, while an
+unclosed TOML-style block returns an error. TOML-style metadata skips blank
+lines and rejects unsupported keys. Bare metadata is consumed only while
+the first slide has no elements.
+
+### Validation
+
+`parse()` only parses; call `validate()` explicitly. Parsed decks default to
+`OverflowPolicy::Reject`. The estimate allows at most 34 lines per slide for
+either aspect ratio: headings count as two; each paragraph counts as its
+character count divided by 90, rounded up (minimum one); each code block
+counts as `str::lines().count()` (minimum one); notes count as zero.
+`OverflowPolicy::Clip` skips the overflow check without changing the content
+or performing clipping. Empty decks are rejected under either policy.
+The first failing slide is reported; the default `Validator` wraps that one
+failure as a single message in `ValidationError::violations`.
+
+Generate API documentation locally with `cargo doc --no-deps --open` from
+this directory. Hosted docs.rs documentation is not currently available.
 
 ### Known limitations
 
@@ -99,7 +137,7 @@ assert_eq!(response.deck.slides.len(), 2);
   [`pdf-engine`](https://github.com/sweengineeringlabs/pdf-engine) project's
   presentation adapter for that.
 - Fenced code blocks do not currently preserve the language tag (e.g. `rust`
-  vs `mermaid`) — all fenced content collapses into one `SlideElement::Code`.
+  vs `mermaid`) — each fenced block becomes one `SlideElement::Code`.
 - This is a deliberate Markdown subset, not a CommonMark implementation:
   only `#`/`##` headings, paragraphs, fenced code, and `:::notes` blocks are
   recognized. Lists, emphasis, links, tables, and nested headings (`###`+) are

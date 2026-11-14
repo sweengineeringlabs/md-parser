@@ -12,6 +12,7 @@ pub enum SlideElement {
     },
     /// Fenced code content.
     Code(String),
-    /// Speaker notes excluded from slide rendering by default.
+    /// Speaker notes retained in the deck and ignored by the line estimate.
+    /// The caller decides whether to render them.
     Notes(String),
 }
