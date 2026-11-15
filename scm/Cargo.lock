@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "swe-md-parser"
-version = "1.9.13"
+name = "md-parser"
+version = "0.1.0"

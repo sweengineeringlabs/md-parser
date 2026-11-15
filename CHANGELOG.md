@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Renamed the Cargo package from `swe-md-parser` to `md-parser` and reset the
+  package version to 0.1.0. Git consumers use the `v0.1.0` tag because the
+  crates.io package name is already registered to another project.
+
 ### Documentation
 
 - Clarified the published `swe-md-parser` package name and the `md-parser`
@@ -97,5 +103,5 @@
   `OverflowPolicy`, and `PresentationError` contracts. Zero runtime
   dependencies.
 
-The 1.9.7 source entry predates registry publication; v1.9.13 is the first
-published release under `swe-md-parser`.
+The 1.9.7 source entry predates registry publication; v1.9.13 was published
+under the temporary package name `swe-md-parser`.

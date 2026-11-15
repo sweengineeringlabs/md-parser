@@ -11,7 +11,7 @@ Install the published crate with this package alias in your application's
 
 ```toml
 [dependencies]
-md-parser = { package = "swe-md-parser", version = "1.9.13" }
+md-parser = { git = "https://github.com/sweengineeringlabs/md-parser", tag = "v0.1.0" }
 ```
 
 For a complete parse-and-validate snippet, see the

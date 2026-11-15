@@ -1,7 +1,8 @@
 # Developer guide
 
-Repository: `md-parser`. Published Cargo package: `swe-md-parser` (typically
-aliased as `md-parser` by consumers). Rust library import: `md_parser`.
+Repository and Cargo package: `md-parser` v0.1.0. Rust library import:
+`md_parser`. Consumers use the Git repository because the crates.io package
+name is already registered to another project.
 
 ## Rename migration
 
@@ -23,7 +24,7 @@ Update consuming applications' `Cargo.toml` entries:
 
 ```toml
 [dependencies]
-md-parser = { git = "https://github.com/sweengineeringlabs/md-parser", tag = "v1.9.10" }
+md-parser = { git = "https://github.com/sweengineeringlabs/md-parser", tag = "v0.1.0" }
 ```
 
 Replace `use pdf_engine_presentation::...` with `use md_parser::...` and
@@ -33,13 +34,12 @@ unchanged. An existing local directory does not need to be renamed.
 The rename is implemented in commit `a3ed7d7`. Existing tags retain their
 original commits: `v1.9.9` predates the rename and still uses the former
 package/import names. `v1.9.10` is the first tag using `md-parser` / `md_parser`.
-The rename itself did not publish a crate. The package was subsequently
-published as `swe-md-parser` in v1.9.13. Current Git consumers should use the
-explicit package alias:
+Release 1.9.13 was published under the temporary name `swe-md-parser`.
+Current Git consumers use the repository package directly:
 
 ```toml
 [dependencies]
-md-parser = { package = "swe-md-parser", git = "https://github.com/sweengineeringlabs/md-parser", tag = "v1.9.13" }
+md-parser = { git = "https://github.com/sweengineeringlabs/md-parser", tag = "v0.1.0" }
 ```
 
 ## Setup
@@ -76,22 +76,19 @@ allowlist; licenses outside it are rejected. CI currently runs formatting,
 Clippy, tests, and a publish dry run; the dependency-policy and documentation
 commands above are additional local checks.
 
-## Publishing
+## Distribution
 
-The Cargo package `swe-md-parser` v1.9.13 is published on crates.io. This name
-avoids the unrelated package already named `md-parser`. Consumers can use the
-local dependency alias `md-parser`; the Rust library remains `md_parser`.
+The Cargo package is `md-parser` v0.1.0. Its name is already registered on
+crates.io by another project, so this repository sets `publish = false` and
+consumers use the Git dependency shown above. The prior `swe-md-parser` v1.9.13
+registry release is a separate package.
 
 ```sh
-cargo publish --dry-run   # verify packaging before every real publish
-cargo publish
+cargo package --list      # inspect package contents
 ```
 
-`Cargo.toml` sets `publish = true` explicitly and declares the package
-version. For a subsequent release, bump the version and update `CHANGELOG.md`,
-run the publish dry run, publish with the authorized registry credentials, and
-verify the new version is downloadable from crates.io. Keep installation
-examples and documentation links aligned with the released package name.
+For Git releases, bump the version, update `CHANGELOG.md`, create the matching
+tag, and keep installation examples aligned with that tag.
 
 ## Public API and versioning
 
@@ -102,11 +99,11 @@ the parser/validator traits, default entry points, request/response types,
 deck/slide/element types, and errors. Internal `api/`, `core/`, and `saf/`
 organization is not a consumer-facing API.
 
-For the 1.x Git releases, use the following versioning policy:
+For 0.x Git releases, use the following versioning policy:
 
 | Change | Required version change |
 |--------|-------------------------|
-| Incompatible public type, trait, signature, or documented parsing/validation behavior | Major |
+| Incompatible public type, trait, signature, or documented parsing/validation behavior | Minor |
 | Backward-compatible public functionality | Minor |
 | Bug fix restoring documented behavior, or documentation-only correction | Patch |
 | Increased minimum supported Rust version | At least minor, with release notes |

@@ -7,21 +7,12 @@ in memory; it does not render slides or generate presentation files.
 
 ## Quick start
 
-The crate is published on crates.io as `swe-md-parser`. The dependency key
-`md-parser` below is a local alias; the crates.io package named `md-parser` is
-a different project.
+Use the Git repository because the crates.io name `md-parser` is already
+registered to another project.
 
 ```toml
 [dependencies]
-md-parser = { package = "swe-md-parser", version = "1.9.13" }
-```
-
-To build from the repository instead, use the same package alias with the
-`sweengineeringlabs/md-parser` Git repository and the `v1.9.13` tag.
-
-```toml
-[dependencies]
-md-parser = { package = "swe-md-parser", git = "https://github.com/sweengineeringlabs/md-parser", tag = "v1.9.13" }
+md-parser = { git = "https://github.com/sweengineeringlabs/md-parser", tag = "v0.1.0" }
 ```
 
 ```rust

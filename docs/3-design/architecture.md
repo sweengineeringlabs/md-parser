@@ -5,9 +5,9 @@ slide conventions, metadata, validation limits, and error behavior. This
 document explains the module structure and design decisions that implement
 those rules.
 
-The repository is `md-parser`; the published Cargo package is
-`swe-md-parser`, commonly aliased as `md-parser` in consuming manifests. The
-Rust library import is `md_parser`.
+The repository and Cargo package are `md-parser`. The Rust library import is
+`md_parser`. Use the Git repository because the crates.io name is already
+registered to another project.
 For existing consumers, see the [rename migration guide](../4-development/developer_guide.md#rename-migration).
 
 ## What

@@ -1,6 +1,6 @@
 [package]
-name = "swe-md-parser"
-version = "1.9.13"
+name = "md-parser"
+version = "0.1.0"
 edition = "2021"
 license = "MIT"
 rust-version = "1.98.1"
@@ -9,7 +9,7 @@ repository = "https://github.com/sweengineeringlabs/md-parser"
 description = "Deterministic Markdown slide-deck parser and content-limit validator with zero external dependencies"
 keywords = ["presentation", "markdown", "slides", "parsing", "validation"]
 categories = ["text-processing"]
-publish = true
+publish = false
 
 [lib]
 name = "md_parser"
